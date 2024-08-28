@@ -1,3 +1,6 @@
+/* Importar Google fonts - Poppins */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
 *{
     padding: 0;
     margin: 0;
@@ -6,14 +9,11 @@
     box-sizing: border-box;
 }
 
-body{
-    font-family: montserrat;
-}
-
 nav{
     background: #0082e6;
     height: 80px;
     width: 100%;
+    font-family: montserrat;
 }
 
 label.logo{
@@ -41,10 +41,6 @@ nav ul li a{
     padding: 7px 13px;
     border-radius: 3px;
     text-transform: uppercase;
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
-    -ms-border-radius: 3px;
-    -o-border-radius: 3px;
 }
 
 active,a:hover{
@@ -54,4 +50,142 @@ active,a:hover{
     -moz-transition: .5s;
     -ms-transition: .5s;
     -o-transition: .5s;
+}
+
+/* --- aside --- */
+
+aside{
+    font-family: "Poppins", sans-serif;
+}
+
+.sidebar{
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 75px;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    background: #161a2d;
+    padding: 25px 20px;
+}
+
+.sidebar:hover{
+    width: 270px;
+}
+
+.sidebar-header{
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-header img{
+    width: 42px;
+    border-radius: 50%;
+}
+
+.sidebar-header h2{
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #fff;
+    margin-left: 23px;
+}
+
+.sidebar-links{
+    list-style: none;
+    margin-top: 20px;
+    height: 60%;
+}
+
+.sidebar-links h4 span{
+    opacity: 0;
+}
+
+.sidebar:hover .sidebar-links h4 span{
+    opacity: 1;
+}
+
+.sidebar-links h4{
+    color: #fff;
+    font-weight: 500;
+    margin: 10px 0;
+    white-space: nowrap;
+    position: relative;
+}
+
+.sidebar-links .menu-separator{
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    height: 1px;
+    transform: scaleX(1);
+    transform: translateY(-50%);
+    background: #333578;
+    transform-origin: right;
+    transition-duration: 0.2s;
+}
+
+.sidebar:hover .sidebar-links .menu-separator{
+    transition-delay: 0s;
+    transform: scaleX(0);
+}
+
+.sidebar-links li a{
+    display: flex;
+    align-items: center;
+    gap: 0 20px;
+    color: #dbd4d4e3;
+    font-weight: 500;
+    padding: 15px 10px;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.sidebar-links li a:hover{
+    background: #ffffff2d;
+    color: #fff;
+    border-radius: 4px;
+}
+
+.user-account{
+    margin-top: auto;
+    padding: 12px 10px;
+    margin-left: -10px;
+}
+
+.user-account .user-profile{
+    display: flex;
+    align-items: center;
+    color: #e5dede;
+}
+
+.user-profile img{
+    width: 42px;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+}
+
+.user-detail{
+    margin-left: 23px;
+    white-space: nowrap;
+}
+
+.user-profile h3{
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.user-profile span{
+    font-size: 0.775rem;
+    font-weight: 600;
+}
+
+.sidebar:hover .user-account{
+    background: #ffffff2d;
+    border-radius: 4px;
 }
