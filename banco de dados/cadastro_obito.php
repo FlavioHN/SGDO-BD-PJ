@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// Verifica se o usuário está autenticado e tem o perfil adequado
+// Verifica se o usuário está autenticado e tem o perfil de médico
 if (!isset($_SESSION['cpf']) || $_SESSION['perfil'] != 'medico') {
     header("Location: login.php");
     exit();
@@ -12,6 +12,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $cpf_obito = $_POST['cpf_obito'];
     $data_obito = $_POST['data_obito'];
     $horario_obito = $_POST['horario_obito'];
+    $data_exame = $_POST['data_exame'];
+    $horario_exame = $_POST['horario_exame'];
+    $laudo_exame = $_POST['laudo_exame'];
 
     // Conectar ao banco de dados
     $conn = new mysqli("localhost", "root", "", "SGDO");
@@ -21,19 +24,65 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("Conexão falhou: " . $conn->connect_error);
     }
 
-
-    // Chamar a procedure de cadastro de óbito
-    $stmt = $conn->prepare("CALL RegisterObito(?, ?, ?, ?)");
-    $stmt->bind_param("ssss", $nome_obito, $cpf_obito, $data_obito, $horario_obito);
-    
-    if ($stmt->execute()) {
-        echo "Obito cadastrado com sucesso!";
-    } else {
-        echo "Erro ao cadastrar óbito: " . $stmt->error;
-    }
-    
+    // Obtém o CRM do médico logado
+    $stmt = $conn->prepare("SELECT crm FROM usuario WHERE cpf = ?");
+    $stmt->bind_param("s", $_SESSION['cpf']);
+    $stmt->execute();
+    $stmt->bind_result($crm_medico);
+    $stmt->fetch();
     $stmt->close();
-    $conn->close();
+
+    // Verifica se o CRM foi encontrado
+    if (empty($crm_medico)) {
+        echo "<p>Erro: CRM do médico não encontrado.</p>";
+    } else {
+        // Verifica se a data e hora do exame são válidas
+        if ($data_exame > $data_obito || ($data_exame == $data_obito && $horario_exame <= $horario_obito)) {
+            echo "<p>Erro: Data ou horário do exame inválidos.</p>";
+        } else {
+            // Inicia uma transação
+            $conn->begin_transaction();
+
+            try {
+                // Chamar a procedure de cadastro de óbito
+                $stmt = $conn->prepare("CALL RegisterObito(?, ?, ?, ?, @id_obito)");
+                $stmt->bind_param("ssss", $nome_obito, $cpf_obito, $data_obito, $horario_obito);
+                if (!$stmt->execute()) {
+                    throw new Exception("Erro ao cadastrar óbito: " . $stmt->error);
+                }
+
+                // Recupera o ID do óbito
+                $stmt = $conn->prepare("SELECT @id_obito");
+                $stmt->execute();
+                $stmt->bind_result($id_obito);
+                $stmt->fetch();
+                $stmt->close();
+
+                // Verifica se o ID do óbito foi recuperado
+                if (empty($id_obito)) {
+                    throw new Exception("Erro ao recuperar ID do óbito.");
+                }
+
+                // Chamar a procedure de cadastro de laudo usando o ID do óbito e CRM do médico
+                $stmt = $conn->prepare("CALL RegisterLaudo(?, ?, ?, ?, ?)");
+                $stmt->bind_param("issss", $id_obito, $crm_medico, $data_exame, $horario_exame, $laudo_exame);
+                if (!$stmt->execute()) {
+                    throw new Exception("Erro ao cadastrar laudo: " . $stmt->error);
+                }
+
+                // Confirma a transação
+                $conn->commit();
+                echo "<p>Óbito e laudo cadastrados com sucesso!</p>";
+            } catch (Exception $e) {
+                // Desfaz a transação em caso de erro
+                $conn->rollback();
+                echo "<p>Falha ao cadastrar: " . $e->getMessage() . "</p>";
+            }
+
+            $stmt->close();
+            $conn->close();
+        }
+    }
 }
 ?>
 
@@ -41,24 +90,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Cadastrar Óbito</title>
+    <title>Cadastrar Óbito e Laudo</title>
 </head>
 <body>
-    <h1>Cadastrar Óbito</h1>
+    <h1>Cadastrar Óbito e Laudo</h1>
     <form method="post" action="">
+        <h2>Dados do Médico</h2>
+        <p>CRM do Médico: <?php echo htmlspecialchars($crm_medico); ?></p>
+
+        <h2>Dados do Óbito</h2>
         <label for="nome_obito">Nome:</label>
         <input type="text" id="nome_obito" name="nome_obito" required>
         <br>
         <label for="cpf_obito">CPF:</label>
         <input type="text" id="cpf_obito" name="cpf_obito" required>
         <br>
-        <label for="data_obito">Data do Obito:</label>
+        <label for="data_obito">Data do Óbito:</label>
         <input type="date" id="data_obito" name="data_obito" required>
         <br>
-        <label for="horario_obito">Horario do Obito:</label>
+        <label for="horario_obito">Horário do Óbito:</label>
         <input type="time" id="horario_obito" name="horario_obito" required>
         <br>
-        <button type="submit">Cadastrar Obito</button>
+        
+        <h2>Dados do Laudo</h2>
+        <label for="data_exame">Data do Exame:</label>
+        <input type="date" id="data_exame" name="data_exame" required>
+        <br>
+        <label for="horario_exame">Horário do Exame:</label>
+        <input type="time" id="horario_exame" name="horario_exame" required>
+        <br>
+        <label for="laudo_exame">Laudo do Exame:</label>
+        <textarea id="laudo_exame" name="laudo_exame" required></textarea>
+        <br>
+        
+        <button type="submit">Cadastrar Óbito e Laudo</button>
     </form>
 </body>
 </html>

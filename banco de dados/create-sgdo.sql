@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS laudo (
   horario_exame TIME NOT NULL,
   laudo_exame TEXT,
   CONSTRAINT fk_id_obito FOREIGN KEY (id_obito) REFERENCES dados_obito(id),
-  CONSTRAINT fk_id_medico FOREIGN KEY (id_medico) REFERENCES usuario(id) -- Alterado para referenciar a tabela de usuários
+  CONSTRAINT fk_id_medico FOREIGN KEY (id_medico) REFERENCES usuario(id)
 );
 
 
@@ -75,22 +75,6 @@ END //
 DELIMITER ;
 
 
--- Procedure de Cadastro de Óbitos
-
-DELIMITER //
-
-CREATE PROCEDURE RegisterObito(
-    IN p_nome_obito VARCHAR(100),
-    IN p_cpf_obito VARCHAR(11),
-    IN p_data_obito DATE,
-    IN p_horario_obito TIME
-)
-BEGIN
-    INSERT INTO dados_obito (nome_obito, cpf_obito, data_obito, horario_obito)
-    VALUES (p_nome_obito, p_cpf_obito, p_data_obito, p_horario_obito);
-END //
-
-DELIMITER ;
 
 -- Procedure de Cadastro de Médicos
 
@@ -138,15 +122,67 @@ CREATE PROCEDURE RegisterLaudo(
     IN p_laudo_exame TEXT
 )
 BEGIN
-    -- Verifica se a data e hora do exame são válidas
-    IF p_data_exame > p_data_obito OR
-       (p_data_exame = p_data_obito AND p_horario_exame <= p_horario_obito) THEN
-        -- Insere um registro na tabela de erros
-        INSERT INTO erro_log (mensagem) VALUES ('Data ou horário do exame inválidos.');
-    END IF;
+    -- Insere o laudo na tabela de laudos
+    INSERT INTO laudo (id_obito, id_medico, data_exame, horario_exame, laudo_exame)
+    VALUES (p_id_obito, p_id_medico, p_data_exame, p_horario_exame, p_laudo_exame);
 END //
 
 DELIMITER ;
+
+
+
+-- Procedure de Cadastro de Óbitos
+DELIMITER //
+
+CREATE PROCEDURE RegisterObito(
+    IN p_nome_obito VARCHAR(100),
+    IN p_cpf_obito VARCHAR(11),
+    IN p_data_obito DATE,
+    IN p_horario_obito TIME,
+    OUT p_id_obito INT
+)
+BEGIN
+    -- Insere o óbito na tabela de dados_obito
+    INSERT INTO dados_obito (nome_obito, cpf_obito, data_obito, horario_obito)
+    VALUES (p_nome_obito, p_cpf_obito, p_data_obito, p_horario_obito);
+    
+    -- Recupera o ID do óbito inserido
+    SET p_id_obito = LAST_INSERT_ID();
+END //
+
+DELIMITER ;
+
+
+-- Procedure de Consulta de Óbitos
+
+DELIMITER //
+
+CREATE PROCEDURE consultarObito(
+    IN p_cpf_obito VARCHAR(11)
+)
+BEGIN
+    -- Seleciona os dados do óbito e do laudo relacionados pelo CPF do óbito
+    SELECT 
+        o.id AS id_obito,
+        o.nome_obito,
+        o.cpf_obito,
+        o.data_obito,
+        o.horario_obito,
+        l.id AS id_laudo,
+        l.id_medico AS id_medico,
+        u.crm AS crm_medico,
+        l.data_exame,
+        l.horario_exame,
+        l.laudo_exame
+    FROM dados_obito o
+    LEFT JOIN laudo l ON o.id = l.id_obito
+    LEFT JOIN usuario u ON l.id_medico = u.id
+    WHERE o.cpf_obito = p_cpf_obito;
+END //
+
+DELIMITER ;
+
+
 
 -- ----------------------------------------------------------------------------------------------------------------------
 
