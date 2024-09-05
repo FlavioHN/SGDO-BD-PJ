@@ -44,11 +44,11 @@ $crm = isset($_SESSION['crm']) ? $_SESSION['crm'] : '';
     <?php if ($perfil == 'atendimento') { ?>        
         <a href="consultar_obito.php">Consultar Obito</a><br>
         <a href="cadastro_medico.php">Cadastrar Medico</a><br>
-        <a href="cadastro_atendente.php">Cadastrar Atendente</a><br>
+        <!--<a href="cadastro_atendente.php">Cadastrar Atendente</a><br>-->
     <?php } elseif ($perfil == 'medico') { ?>
         <a href="cadastro_obito.php">Cadastrar Obito</a><br>
         <a href="consultar_obito.php">Consultar Obito</a><br>
-        <a href="cadastro_atendente.php">Cadastrar Atendente</a><br>
+        <!--<a href="cadastro_atendente.php">Cadastrar Atendente</a><br>-->
         <a href="cadastro_medico.php"  >Cadastrar Medico</a><br>
         
     <?php } ?>

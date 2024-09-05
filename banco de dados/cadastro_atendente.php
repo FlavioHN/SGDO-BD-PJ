@@ -2,7 +2,7 @@
 session_start();
 
 // Verifica se o usuário está autenticado e é um atendimento
-if (!isset($_SESSION['ativa']) || $_SESSION['perfil'] != 'atendimento') {
+if (!isset($_SESSION['ativa'])) {
     header("Location: login.php");
     exit();
 }

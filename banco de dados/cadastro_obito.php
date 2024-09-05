@@ -34,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Verifica se o CRM foi encontrado
     if (empty($crm_medico)) {
-        echo "<p>Erro: CRM do médico não encontrado.</p>";
+        echo "<p>Erro: CRM do medico não encontrado.</p>";
     } else {
         // Verifica se a data e hora do exame são válidas
         if ($data_exame > $data_obito || ($data_exame == $data_obito && $horario_exame <= $horario_obito)) {
@@ -44,26 +44,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $conn->begin_transaction();
 
             try {
-                // Chamar a procedure de cadastro de óbito
+                // Chamar a procedure de cadastro de Obito
                 $stmt = $conn->prepare("CALL RegisterObito(?, ?, ?, ?, @id_obito)");
                 $stmt->bind_param("ssss", $nome_obito, $cpf_obito, $data_obito, $horario_obito);
                 if (!$stmt->execute()) {
-                    throw new Exception("Erro ao cadastrar óbito: " . $stmt->error);
+                    throw new Exception("Erro ao cadastrar Obito: " . $stmt->error);
                 }
 
-                // Recupera o ID do óbito
+                // Recupera o ID do Obito
                 $stmt = $conn->prepare("SELECT @id_obito");
                 $stmt->execute();
                 $stmt->bind_result($id_obito);
                 $stmt->fetch();
                 $stmt->close();
 
-                // Verifica se o ID do óbito foi recuperado
+                // Verifica se o ID do Obito foi recuperado
                 if (empty($id_obito)) {
-                    throw new Exception("Erro ao recuperar ID do óbito.");
+                    throw new Exception("Erro ao recuperar ID do Obito.");
                 }
 
-                // Chamar a procedure de cadastro de laudo usando o ID do óbito e CRM do médico
+                // Chamar a procedure de cadastro de laudo usando o ID do Obito e CRM do médico
                 $stmt = $conn->prepare("CALL RegisterLaudo(?, ?, ?, ?, ?)");
                 $stmt->bind_param("issss", $id_obito, $crm_medico, $data_exame, $horario_exame, $laudo_exame);
                 if (!$stmt->execute()) {
@@ -72,7 +72,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 // Confirma a transação
                 $conn->commit();
-                echo "<p>Óbito e laudo cadastrados com sucesso!</p>";
+                echo "<p>Obito e laudo cadastrados com sucesso!</p>";
             } catch (Exception $e) {
                 // Desfaz a transação em caso de erro
                 $conn->rollback();
@@ -84,31 +84,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 }
+
+
+
+
+
 ?>
 
+
+
+
+    
+    
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Cadastrar Óbito e Laudo</title>
+    <title>Cadastrar Obito e Laudo</title>
+    <link rel="stylesheet" href="bootstrap.min.css">
 </head>
 <body>
-    <h1>Cadastrar Óbito e Laudo</h1>
+    <h1>Cadastrar Obito e Laudo</h1>
     <form method="post" action="">
-        <h2>Dados do Médico</h2>
-        <p>CRM do Médico: <?php echo htmlspecialchars($crm_medico); ?></p>
-
-        <h2>Dados do Óbito</h2>
+        <a href="index.php">HOME</a><br>
+        
+        <h2>Dados do Obito</h2>
         <label for="nome_obito">Nome:</label>
         <input type="text" id="nome_obito" name="nome_obito" required>
         <br>
         <label for="cpf_obito">CPF:</label>
         <input type="text" id="cpf_obito" name="cpf_obito" required>
         <br>
-        <label for="data_obito">Data do Óbito:</label>
+        <label for="data_obito">Data do Obito:</label>
         <input type="date" id="data_obito" name="data_obito" required>
         <br>
-        <label for="horario_obito">Horário do Óbito:</label>
+        <label for="horario_obito">Horario do Obito:</label>
         <input type="time" id="horario_obito" name="horario_obito" required>
         <br>
         
@@ -116,14 +126,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <label for="data_exame">Data do Exame:</label>
         <input type="date" id="data_exame" name="data_exame" required>
         <br>
-        <label for="horario_exame">Horário do Exame:</label>
+        
+        <label for="horario_exame">Horario do Exame:</label>
         <input type="time" id="horario_exame" name="horario_exame" required>
         <br>
         <label for="laudo_exame">Laudo do Exame:</label>
         <textarea id="laudo_exame" name="laudo_exame" required></textarea>
         <br>
         
-        <button type="submit">Cadastrar Óbito e Laudo</button>
+
+  
+  
+
+        
+        
+        <button type="submit">Cadastrar Obito e Laudo</button>
     </form>
 </body>
 </html>
